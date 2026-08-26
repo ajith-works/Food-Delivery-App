@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Werkzeug==3.0.3
+
+# Optional, only needed if you switch DATABASE_URL to MySQL:
+# PyMySQL==1.1.1

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Track Order #{{ order.id }} - FoodExpress{% endblock %}
+{% block content %}
+
+<h2 class="fw-bold mb-1">Order #{{ order.id }}</h2>
+<p class="text-muted mb-4">{{ restaurant.name }} &middot; Placed {{ order.created_at | fmtdate }}</p>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="stage-track">
+      <div class="fill" id="progress-fill" style="width: {{ progress }}%;"></div>
+      {% for s in stages %}
+      <div class="stage {{ 'done' if loop.index0 < stages.index(order.status) else ('active' if s == order.status else '') }}" data-stage="{{ s }}">
+        <div class="dot"><i class="bi bi-check-lg"></i></div>
+        <div>{{ s }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-center mt-4 mb-0 fs-5" id="status-text">
+      <span class="badge bg-warning text-dark" id="status-badge">{{ order.status }}</span>
+    </p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5><i class="bi bi-bicycle"></i> Delivery Partner</h5>
+        {% if delivery %}
+        <p class="mb-1"><strong>{{ delivery.agent_name }}</strong></p>
+        <p class="text-muted small mb-1">{{ delivery.vehicle }} &middot; {{ delivery.agent_phone }}</p>
+        <p class="text-muted small mb-0" id="eta-text">Estimated delivery: {{ delivery.estimated_minutes }} mins</p>
+        {% else %}
+        <p class="text-muted">Assigning a delivery partner...</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5><i class="bi bi-receipt"></i> Order Summary</h5>
+        {% for item in items %}
+        <div class="d-flex justify-content-between small mb-1">
+          <span>{{ item.name_snapshot }} × {{ item.quantity }}</span>
+          <span>₹{{ "%.2f"|format(item.price_snapshot * item.quantity) }}</span>
+        </div>
+        {% endfor %}
+        <hr>
+        <div class="d-flex justify-content-between fw-bold">
+          <span>Total</span><span>₹{{ "%.2f"|format(order.total_amount) }}</span>
+        </div>
+        <p class="text-muted small mt-2 mb-0">Deliver to: {{ order.delivery_address }}</p>
+        <p class="text-muted small mb-0">Payment: {{ order.payment_method }} &middot;
+          <span class="badge {{ 'bg-success' if order.payment_status == 'Paid' else 'bg-secondary' }}">{{ order.payment_status }}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const orderId = {{ order.id }};
+const stagesOrder = {{ stages | tojson }};
+
+function refreshStatus() {
+  fetch(`/api/order/${orderId}/status`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('status-badge').textContent = data.status;
+      document.getElementById('progress-fill').style.width = data.progress + '%';
+
+      const currentIdx = stagesOrder.indexOf(data.status);
+      document.querySelectorAll('.stage').forEach((el, idx) => {
+        el.classList.remove('active', 'done');
+        if (idx < currentIdx) el.classList.add('done');
+        else if (idx === currentIdx) el.classList.add('active');
+      });
+
+      const badge = document.getElementById('status-badge');
+      badge.className = 'badge ' + (data.status === 'Delivered' ? 'bg-success' : 'bg-warning text-dark');
+
+      if (data.status === 'Delivered') {
+        clearInterval(poller);
+      }
+    })
+    .catch(err => console.error('Status refresh failed', err));
+}
+
+refreshStatus();
+const poller = setInterval(refreshStatus, 4000);
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Payment - FoodExpress{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Secure Payment</h5>
+          <span class="badge bg-secondary">Order #{{ order.id }}</span>
+        </div>
+        <p class="text-muted">Amount to pay: <strong class="fs-5 text-dark">₹{{ "%.2f"|format(order.total_amount) }}</strong></p>
+
+        {% if order.payment_status == 'Failed' %}
+        <div class="alert alert-danger">Previous attempt failed. Please try again.</div>
+        {% endif %}
+
+        <form method="post" id="payment-form">
+          <div class="mb-3">
+            <label class="form-label">Card Number</label>
+            <input type="text" class="form-control" name="card_number" placeholder="4242 4242 4242 4242" maxlength="19" required>
+            <div class="form-text">Demo gateway — any valid-looking card number (12+ digits) will succeed.</div>
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Expiry</label>
+              <input type="text" class="form-control" placeholder="MM/YY" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">CVV</label>
+              <input type="password" class="form-control" placeholder="•••" maxlength="3" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name on Card</label>
+            <input type="text" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-brand btn-lg w-100" id="pay-btn">
+            Pay ₹{{ "%.2f"|format(order.total_amount) }}
+          </button>
+        </form>
+      </div>
+    </div>
+    <p class="text-center text-muted small mt-3">
+      <i class="bi bi-lock-fill"></i> This is a simulated payment flow for demo purposes only. No real transaction occurs.
+    </p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('payment-form').addEventListener('submit', function() {
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = 'Processing payment...';
+});
+</script>
+{% endblock %}

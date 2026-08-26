@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - FoodExpress{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+  <a href="{{ url_for('admin_new_restaurant') }}" class="btn btn-brand"><i class="bi bi-plus-lg"></i> Add Restaurant</a>
+</div>
+
+<h5 class="mb-3">Restaurants &amp; Menu Management</h5>
+<div class="table-responsive mb-5">
+  <table class="table table-hover align-middle bg-white">
+    <thead>
+      <tr><th>Name</th><th>Cuisine</th><th>Rating</th><th>Menu Items</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for r in restaurants %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.cuisine }}</td>
+        <td>{{ r.rating }}</td>
+        <td>{{ menu_counts.get(r.id, 0) }}</td>
+        <td><a href="{{ url_for('admin_manage_menu', restaurant_id=r.id) }}" class="btn btn-sm btn-outline-secondary">Manage Menu</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h5 class="mb-3">Recent Orders</h5>
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white">
+    <thead>
+      <tr><th>#</th><th>Customer</th><th>Restaurant</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o.id }}</td>
+        <td>{{ o.user_name }}</td>
+        <td>{{ o.restaurant_name }}</td>
+        <td>₹{{ "%.2f"|format(o.total_amount) }}</td>
+        <td><span class="badge {{ 'bg-success' if o.payment_status == 'Paid' else 'bg-secondary' }}">{{ o.payment_status }}</span></td>
+        <td><span class="badge bg-warning text-dark">{{ o.live_status }}</span></td>
+        <td>
+          {% if o.payment_status == 'Paid' and o.live_status != 'Delivered' %}
+          <form method="post" action="{{ url_for('admin_advance_order', order_id=o.id) }}">
+            <button class="btn btn-sm btn-outline-primary">Advance Stage</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

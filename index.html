@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}FoodExpress - Order food online{% endblock %}
+{% block content %}
+
+<div class="hero mb-4">
+  <h1 class="fw-bold">Hungry? We've got you covered.</h1>
+  <p class="text-muted mb-3">Order from the best restaurants near you, track your delivery live.</p>
+  <form class="row g-2" method="get" action="{{ url_for('index') }}">
+    <div class="col-md-6">
+      <input type="text" class="form-control form-control-lg" name="q" placeholder="Search restaurants..." value="{{ query }}">
+    </div>
+    <div class="col-md-4">
+      <select class="form-select form-select-lg" name="cuisine">
+        <option value="">All Cuisines</option>
+        {% for c in cuisines %}
+          <option value="{{ c }}" {% if c == selected_cuisine %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-brand btn-lg w-100" type="submit">Search</button>
+    </div>
+  </form>
+</div>
+
+<h4 class="mb-3">Restaurants near you</h4>
+<div class="row g-4">
+  {% for r in restaurants %}
+  <div class="col-md-6 col-lg-3">
+    <a href="{{ url_for('restaurant_detail', restaurant_id=r.id) }}" class="text-decoration-none text-dark">
+      <div class="card restaurant-card h-100">
+        <img src="{{ r.image_url }}" class="card-img-top" alt="{{ r.name }}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title mb-1">{{ r.name }}</h5>
+            <span class="badge badge-rating"><i class="bi bi-star-fill"></i> {{ r.rating }}</span>
+          </div>
+          <p class="text-muted small mb-1">{{ r.cuisine }}</p>
+          <p class="text-muted small mb-0"><i class="bi bi-clock"></i> {{ r.delivery_time_min }} mins &middot; <i class="bi bi-geo-alt"></i> {{ r.address }}</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% else %}
+  <p class="text-muted">No restaurants found.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

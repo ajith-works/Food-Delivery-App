@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Checkout - FoodExpress{% endblock %}
+{% block content %}
+
+<h2 class="fw-bold mb-4">Checkout</h2>
+
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Delivery Details</h5>
+        <form method="post" id="checkout-form">
+          <div class="mb-3">
+            <label class="form-label">Delivery Address</label>
+            <textarea class="form-control" name="address" rows="3" required>{{ default_address }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" name="payment_method">
+              <option value="Card">Credit / Debit Card</option>
+              <option value="UPI">UPI</option>
+              <option value="Cash on Delivery">Cash on Delivery</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-brand btn-lg w-100">Continue to Payment</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Order Summary &mdash; {{ restaurant.name }}</h5>
+        {% for entry in items %}
+        <div class="d-flex justify-content-between small mb-2">
+          <span>{{ entry.item.name }} × {{ entry.qty }}</span>
+          <span>₹{{ "%.2f"|format(entry.subtotal) }}</span>
+        </div>
+        {% endfor %}
+        <hr>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Delivery Fee</span><span>₹{{ "%.2f"|format(delivery_fee) }}</span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold fs-5">
+          <span>Total</span><span>₹{{ "%.2f"|format(total + delivery_fee) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
